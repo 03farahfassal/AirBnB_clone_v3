@@ -25,7 +25,7 @@ def states(state_id=None):
 
 
 @app_views.route("/states/<state_id>", strict_slashes=False,
-                methods=["DELETE"])
+                 methods=["DELETE"])
 def states_delete(state_id):
     """Delete method."""
     obj = storage.get(State, state_id)
