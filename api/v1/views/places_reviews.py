@@ -40,7 +40,7 @@ def reviews_by_place(place_id):
         return jsonify(review.to_dict()), 201
 
 
-@app_views.route('/reviews/<string:review_id>',
+@app_views.route('/reviews/<review_id>',
                  methods=['GET', 'PUT', 'DELETE'], strict_slashes=False)
 def review_by_review_id(review_id):
     """retrieves review by review id"""
@@ -55,9 +55,11 @@ def review_by_review_id(review_id):
         return jsonify({}), 200
     elif request.method == 'PUT':
         my_dict = request.get_json()
-        if my_dict is None:
+        if not my_dict:
             abort(400, 'Not a JSON')
         for k, v in my_dict.items():
-            setattr(review, k, v)
+            if k not in ['id', 'user_id', 'city_id',
+                         'created_at', 'updated_at']:
+                setattr(review, k, v)
         review.save()
         return jsonify(review.to_dict()), 200
