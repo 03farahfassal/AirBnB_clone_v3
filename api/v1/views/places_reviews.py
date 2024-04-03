@@ -23,7 +23,7 @@ def reviews_by_place(place_id):
         return jsonify(reviews)
     elif request.method == 'POST':
         my_dict = request.get_json()
-        
+
         if my_dict is None:
             abort(400, 'Not a JSON')
         if 'user_id' not in my_dict:
