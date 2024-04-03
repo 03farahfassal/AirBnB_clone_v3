@@ -27,24 +27,25 @@ def places_by_city(city_id):
 
         if city:
             my_dict = request.get_json()
-            if my_dict is None:
+            if not my_dict:
                 abort(400, 'Not a JSON')
-            if my_dict.get("user_id") is None:
+            if 'user_id' not in my_dict:
                 abort(400, 'Missing user_id')
-            if my_dict.get("name") is None:
+            if 'name' not in my_dict:
                 abort(400, 'Missing name')
-
-            user = storage.get(User, my_dict.get("user_id"))
+            user_id = my_dict['user_id']
+            user = storage.get(User, user_id)
 
             if user:
                 place = Place(**my_dict)
+                place.city_id = city_id
                 place.save()
                 return jsonify(place.to_dict()), 201
             abort(404)
         abort(404)
 
 
-@app_views.route('/places/<string:place_id>',
+@app_views.route('/places/<place_id>',
                  methods=['GET', 'PUT', 'DELETE'], strict_slashes=False)
 def place_by_place_id(place_id):
     """Retrieves a place based on the place_id"""
@@ -54,15 +55,17 @@ def place_by_place_id(place_id):
         abort(404)
     if request.method == 'GET':
         return jsonify(place.to_dict())
-    if request.method == 'DELETE':
+    elif request.method == 'DELETE':
         place.delete()
         storage.save()
         return jsonify({}), 200
-    if request.method == 'PUT':
+    elif request.method == 'PUT':
         my_dict = request.get_json()
         if my_dict is None:
             abort(400, 'Not a JSON')
         for k, v in my_dict.items():
-            setattr(place, k, v)
+            if k not in ['id', 'user_id', 'city_id',
+                         'created_at', 'updated_at']:
+                setattr(place, k, v)
         place.save()
         return jsonify(place.to_dict()), 200
