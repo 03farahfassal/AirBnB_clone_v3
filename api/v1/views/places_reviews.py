@@ -23,17 +23,19 @@ def reviews_by_place(place_id):
         return jsonify(reviews)
     elif request.method == 'POST':
         my_dict = request.get_json()
-        user = storage.get(User, my_dict.get('user_id'))
-
+        
         if my_dict is None:
             abort(400, 'Not a JSON')
-        if my_dict.get("user_id") is None:
+        if 'user_id' not in my_dict:
             abort(400, 'Missing user_id')
-        if my_dict.get("text") is None:
+        if 'text' not in my_dict:
             abort(400, 'Missing text')
+        user_id = data['user_id']
+        user = storage.get(User, user_id)
         if user is None:
             abort(404)
         review = Review(**my_dict)
+        review.place_id = place_id
         review.save()
         return jsonify(review.to_dict()), 201
 
@@ -47,11 +49,11 @@ def review_by_review_id(review_id):
         abort(404)
     if request.method == 'GET':
         return jsonify(review.to_dict())
-    if request.method == 'DELETE':
+    elif request.method == 'DELETE':
         storage.delete(review)
         storage.save()
         return jsonify({}), 200
-    if request.method == 'PUT':
+    elif request.method == 'PUT':
         my_dict = request.get_json()
         if my_dict is None:
             abort(400, 'Not a JSON')
